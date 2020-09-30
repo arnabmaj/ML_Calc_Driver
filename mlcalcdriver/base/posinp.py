@@ -705,6 +705,23 @@ class Posinp(Sequence):
         )
         return angle
 
+    def to_pixels(self, dpa=8):
+        r"""
+        """
+        if self.units in ["reduced", "atomic"]:
+            self.convert_units("angstroem")
+        if self.boundary_conditions == "periodic":
+            image = np.zeros([int(max(dim) * dpa) for dim in self.cell.array])
+        elif self.boundary_conditions == "surface":
+            dims = [max(dim) if np.any(dim>0) else 2. for dim in self.cell.array]
+            image = np.zeros([int(dim * dpa) for dim in dims])
+        else:
+            raise NotImplementedError
+        for atom in self:
+            sp = [int(p * dpa) for p in atom.position]
+            image[sp[0], sp[1], sp[2]] = atom.mass
+        return image
+
 
 class Atom(object):
     r"""
